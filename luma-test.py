@@ -8,9 +8,9 @@ import os
 client = LumaAI()
 
 generation = client.generations.create(
-    aspect_ratio="16:9",
-    loop=False,
-    prompt="A trailer for a documentary about Sumerian tablets.",#"VHS footage of Sumerian tablet exhibition.",#"Ancient sumerian tablets being excavated.",
+  aspect_ratio="16:9",
+  loop=False,
+  prompt="The Cyrus Cylinder is an ancient clay cylinder, dating from the 6th century BCE, that contains a declaration in Akkadian cuneiform script by the Persian king Cyrus the Great after his conquest of Babylon. Found in 1879, it's considered one of the first documents on human rights, as it describes Cyrus's peaceful policy of religious and cultural tolerance toward conquered peoples. The artifact, currently housed in the British Museum, marks an important historical moment in the Persian Empire and is a symbol of enlightened leadership in ancient times. ",
 )
 completed = False
 while not completed:
