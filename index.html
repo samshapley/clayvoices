@@ -18,11 +18,15 @@
     <main>
         <div class="panel" id="knowledge-graph">
             <h2>Knowledge Graph</h2>
-            <p>Placeholder for Knowledge Graph</p>
+            <button id="scrapeButton">Scrape CDLI API</button>
+            <div id="scrapedData"></div>
         </div>
         <div class="panel" id="avatar">
             <h2>Avatar</h2>
-            <p>Placeholder for Avatar</p>
+            <textarea id="promptInput" placeholder="Enter your prompt here"></textarea>
+            <button id="promptButton">Send Prompt</button>
+            <div id="promptResponse"></div>
+            <div id="errorMessage" style="color: red;"></div>
         </div>
         <div class="panel" id="dream-view">
             <video controls>
