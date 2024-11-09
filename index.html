@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clay Voices</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Move the filter popup here, outside of any containers -->
@@ -26,47 +27,49 @@
             <path d="M25,35 L35,25 M55,35 L65,25 M40,55 L50,45 M60,55 L70,45 M35,75 L45,65 M55,75 L65,65" stroke="black" stroke-width="3" stroke-linecap="round"/>
         </svg>
         <h1>Clay Voices</h1>
+        <button id="filterButton" class="header-filter-button">Filter</button>
     </header>
     <main>
-        <!-- Left Side Container -->
-        <div class="left-container">
-            <!-- Artifacts Table -->
-            <div class="panel" id="artifacts-table">
-                <button id="filterButton">Filter Data</button>
-                <div id="table-container">
-                    <table id="artifacts-data">
-                        <thead>
-                            <tr>
-                                <th>Tablet ID</th>
-                                <th>Name</th>
-                                <th>Language</th>
-                                <th>Material</th>
-                                <th>Period</th>
-                                <th>Provenience</th>
-                                <th>Collection</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Table rows will be dynamically inserted here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <!-- Dream View -->
-            <div class="panel" id="dream-view">
-                <video controls>
-                    <source src="46bd36a6-6b8b-4c4e-a4a4-d4d4ff9172e5.mp4" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-            </div>
+        <!-- Inside the #table-container div -->
+        <div id="table-container">
+            <table id="artifacts-data">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Language</th>
+                        <th>Material</th>
+                        <th>Period</th>
+                        <th>Provenience</th>
+                        <th>Collection</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table content will be dynamically populated -->
+                </tbody>
+            </table>
         </div>
-        <!-- Avatar View -->
+    
+        <!-- Summary Panel (Bottom Left) -->
+        <div id="summary-panel" class="summary-panel">
+            <p id="artifact-summary"></p>
+        </div>
+    
+        <!-- Avatar (Top Right) -->
         <div class="panel" id="avatar">
             <h2>Avatar</h2>
             <textarea id="promptInput" placeholder="Enter your prompt here"></textarea>
             <button id="promptButton">Send Prompt</button>
             <div id="promptResponse"></div>
             <div id="errorMessage" style="color: red;"></div>
+        </div>
+    
+        <!-- Dream View (Bottom Right) -->
+        <div class="panel" id="dream-view">
+            <video controls>
+                <source src="46bd36a6-6b8b-4c4e-a4a4-d4d4ff9172e5.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
         </div>
     </main>
     <script src="script.js"></script>

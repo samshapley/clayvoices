@@ -30,19 +30,23 @@ header {
     display: flex;
     align-items: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    justify-content: space-between; /* Add this to space out the elements */
 }
 
 h1 {
     margin: 0 0 0 1rem;
-    font-size: 1.5rem;
-    font-weight: 300;
+    font-size: 1.8rem;  /* Increased from 1.5rem */
+    font-weight: 700;   /* Changed from 300 to bold */
+    font-family: 'Orbitron', sans-serif;  /* Modern, tech-looking font */
+    letter-spacing: 1px;  /* Add some spacing between letters */
+    text-transform: uppercase;  /* Make it all caps for more impact */
 }
 
 main {
     flex-grow: 1;
     display: grid;
     grid-template-columns: 1fr 1fr; /* Two equal columns */
-    grid-template-rows: 1fr;
+    grid-template-rows: 1fr 1fr; /* Two equal rows */
     gap: 1rem;
     padding: 1rem;
     animation: fadeIn 0.5s ease-out;
@@ -50,12 +54,9 @@ main {
     overflow: hidden;
 }
 
+/* Remove the left-container class as we're using quadrants now */
 .left-container {
-    display: grid;
-    grid-template-rows: calc(50% - 0.5rem) calc(50% - 0.5rem); /* Adjust for gap */
-    gap: 1rem;
-    height: 100%;
-    overflow: hidden;
+    display: contents; /* This makes the container's children participate in the grid layout */
 }
 
 @keyframes fadeIn {
@@ -94,10 +95,14 @@ main {
     flex-direction: column;
 }
 
-
 .panel:hover {
     transform: translateY(-5px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+#summary-panel {
+    grid-column: 1;
+    grid-row: 2;
 }
 
 h2 {
@@ -108,11 +113,10 @@ h2 {
 }
 
 #dream-view {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    padding: 0; /* Remove padding to maximize video space */
+    grid-column: 2;
+    grid-row: 2;
 }
+
 
 #dream-view video {
     width: 100%;
@@ -122,7 +126,8 @@ h2 {
 }
 
 #artifacts-table {
-    overflow: hidden; /* Ensure nothing breaks out of the panel */
+    grid-column: 1;
+    grid-row: 1;
 }
 
 #table-container {
@@ -144,7 +149,12 @@ h2 {
     border: none;
     padding: 12px 16px;
     text-align: left;
-    background: white;
+    background: white; /* Existing background */
+}
+
+/* New rule to apply background to td when tr is selected */
+#artifacts-data tbody tr.selected td {
+    background-color: #e6f3ff !important; /* Light blue background */
 }
 
 #artifacts-data th {
@@ -166,7 +176,12 @@ h2 {
     background: white;
 }
 
-#artifacts-data tbody tr:hover {
+#artifacts-data tbody tr.selected {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+#artifacts-data tbody tr:hover:not(.selected) {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     background: white;
@@ -249,8 +264,8 @@ video {
     }
 
     #avatar {
-        grid-column: 1;
-        grid-row: 2;
+        grid-column: 2;
+        grid-row: 1;
     }
 
     #dream-view {
@@ -347,4 +362,46 @@ video {
 
 #filterButton {
     margin-bottom: 10px;
+}
+
+.header-filter-button {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.header-filter-button:hover {
+    background-color: var(--primary-color);
+}
+
+.summary-panel {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: none;
+    width: calc(100% - 30px); /* Account for padding */
+    box-sizing: border-box;
+    position: relative;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.summary-panel.visible {
+    display: block;
+    opacity: 1;
+}
+
+#artifact-summary {
+    margin: 0;
+    padding: 10px 0;
+    white-space: pre-wrap;
+    word-break: break-word;
 }

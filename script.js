@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
         filterContainer.innerHTML = '';
         
         // Get unique values for each column
-        const columns = ['id', 'name', 'language', 'material', 'period', 'provenience', 'collection'];
+        const columns = ['artifact_id', 'name', 'language', 'material', 'period', 'provenience', 'collection'];
         columns.forEach(column => {
             const uniqueValues = [...new Set(data.map(item => item[column]))].sort();
             
@@ -56,25 +56,71 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function applyFilters() {
-        let filteredData = [...artifactsData];
-        
-        Object.entries(filterControls).forEach(([column, select]) => {
-            const selectedValues = Array.from(select.selectedOptions).map(option => option.value);
-            if (selectedValues.length && !selectedValues.includes('')) {
-                filteredData = filteredData.filter(item => selectedValues.includes(item[column]));
+    function generateSummary(artifactId) {
+        // Ensure artifactId is a string
+        const idString = String(artifactId);
+    
+        // Initialize the summary panel
+        const summaryPanel = document.getElementById('summary-panel');
+        const artifactSummary = document.getElementById('artifact-summary');
+        artifactSummary.textContent = ''; // Clear previous content
+        summaryPanel.style.display = 'block';
+        summaryPanel.classList.add('visible');
+    
+        fetch('/generate-summary', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ artifactId: idString })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+    
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+    
+            function processText(text) {
+                artifactSummary.textContent += text;
+                // Scroll to bottom as new text arrives
+                artifactSummary.scrollTop = artifactSummary.scrollHeight;
+            }
+    
+            function readStream() {
+                return reader.read().then(({done, value}) => {
+                    if (done) {
+                        if (buffer) {
+                            processText(buffer);
+                        }
+                        return;
+                    }
+    
+                    buffer += decoder.decode(value, {stream: true});
+                    processText(buffer);
+                    buffer = '';
+                    
+                    return readStream();
+                });
+            }
+    
+            return readStream();
+        })
+        .catch(error => {
+            console.error('Error in generateSummary:', error);
+            artifactSummary.textContent = 'An error occurred while generating the summary.';
         });
-        
-        updateTable(filteredData);
-        filterPopup.style.display = 'none';
     }
 
     function updateTable(data) {
         const tableBody = document.querySelector('#artifacts-data tbody');
         tableBody.innerHTML = '';
+        
         data.forEach(artifact => {
             const row = document.createElement('tr');
+            row.dataset.artifactId = artifact.id;
             row.innerHTML = `
                 <td>${artifact.id}</td>
                 <td>${artifact.name}</td>
@@ -84,9 +130,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${artifact.provenience}</td>
                 <td>${artifact.collection}</td>
             `;
+            
+            // Click handler to add 'selected' class
+            row.addEventListener('click', function() {
+                // Remove selected class from all rows
+                document.querySelectorAll('#artifacts-data tbody tr').forEach(r => {
+                    r.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked row
+                row.classList.add('selected');
+                
+                console.log('Row clicked for artifact:', artifact.id);
+                generateSummary(artifact.id);
+            });
+            
             tableBody.appendChild(row);
         });
     }
+
 
     function loadArtifactsData() {
         fetch('/artifacts-data')
