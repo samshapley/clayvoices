@@ -55,24 +55,34 @@ document.addEventListener('DOMContentLoaded', function() {
             filterControls[column] = select;
         });
     }
+    
+    let currentStream = null; // Add this at the top level to track the current fetch request
 
     function generateSummary(artifactId) {
         // Ensure artifactId is a string
         const idString = String(artifactId);
     
-        // Initialize the summary panel
-        const summaryPanel = document.getElementById('summary-panel');
+        // Clear previous content and hide initial message
         const artifactSummary = document.getElementById('artifact-summary');
-        artifactSummary.textContent = ''; // Clear previous content
-        summaryPanel.style.display = 'block';
-        summaryPanel.classList.add('visible');
+        const initialMessage = document.getElementById('initial-message');
+        artifactSummary.textContent = '';
+        initialMessage.style.display = 'none';
+    
+        // Cancel existing stream if any
+        if (currentStream && currentStream.abort) {
+            currentStream.abort();
+        }
+    
+        // Create new AbortController for this request
+        currentStream = new AbortController();
     
         fetch('/generate-summary', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ artifactId: idString })
+            body: JSON.stringify({ artifactId: idString }),
+            signal: currentStream.signal
         })
         .then(response => {
             if (!response.ok) {
@@ -85,7 +95,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
             function processText(text) {
                 artifactSummary.textContent += text;
-                // Scroll to bottom as new text arrives
                 artifactSummary.scrollTop = artifactSummary.scrollHeight;
             }
     
@@ -109,6 +118,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return readStream();
         })
         .catch(error => {
+            if (error.name === 'AbortError') {
+                console.log('Fetch aborted');
+                return;
+            }
             console.error('Error in generateSummary:', error);
             artifactSummary.textContent = 'An error occurred while generating the summary.';
         });

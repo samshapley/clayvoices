@@ -30,17 +30,18 @@ header {
     display: flex;
     align-items: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    justify-content: space-between; /* Add this to space out the elements */
+    gap: 1rem; /* Add spacing between elements */
 }
 
 h1 {
-    margin: 0 0 0 1rem;
-    font-size: 1.8rem;  /* Increased from 1.5rem */
-    font-weight: 700;   /* Changed from 300 to bold */
-    font-family: 'Orbitron', sans-serif;  /* Modern, tech-looking font */
-    letter-spacing: 1px;  /* Add some spacing between letters */
-    text-transform: uppercase;  /* Make it all caps for more impact */
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
+
 
 main {
     flex-grow: 1;
@@ -100,10 +101,34 @@ main {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
-#summary-panel {
+.summary-panel {
+    background-color: var(--panel-background);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
     grid-column: 1;
     grid-row: 2;
+    overflow-y: auto;
+    border: 2px solid var(--primary-color); /* Added black border */
 }
+
+.summary-panel h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--primary-color);
+}
+
+#initial-message {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
 
 h2 {
     color: var(--secondary-color);
@@ -120,9 +145,10 @@ h2 {
 
 #dream-view video {
     width: 100%;
-    height: 100%; /* Fill entire container */
+    height: 100%;
     object-fit: contain;
     border-radius: 10px;
+    border: 2px solid var(--primary-color); /* Added black border */
 }
 
 #artifacts-table {
@@ -132,16 +158,21 @@ h2 {
 
 #table-container {
     width: 100%;
-    height: calc(100% - 60px); /* Subtract the header height */
+    height: calc(100% - 60px);
     overflow-y: auto;
     overflow-x: auto;
+    border: 2px solid var(--primary-color);
+    border-radius: 10px;
+    padding: 1rem;
+    box-sizing: border-box;
+    background-color: var(--panel-background); /* Add white background */
 }
 
 #artifacts-data {
-    width: 100%;
+    width: calc(100% - 2rem); /* Adjust width to account for container padding */
     border-collapse: separate;
     border-spacing: 0 8px;
-    margin-top: -8px; /* Compensate for border-spacing */
+    margin-top: -8px;
 }
 
 #artifacts-data th,
@@ -274,7 +305,17 @@ video {
     }
 
     .panel {
-        padding: 1rem;
+        background-color: var(--panel-background);
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        animation: slideIn 0.5s ease-out;
+        border: 2px solid var(--primary-color); /* Added black border */
     }
 
     h1 {
@@ -372,31 +413,11 @@ video {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    margin-left: auto;
 }
 
 .header-filter-button:hover {
     background-color: var(--primary-color);
-}
-
-.summary-panel {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 15px;
-    margin-bottom: 20px;
-    display: none;
-    width: calc(100% - 30px); /* Account for padding */
-    box-sizing: border-box;
-    position: relative;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    grid-column: 1;
-    grid-row: 2;
-}
-
-.summary-panel.visible {
-    display: block;
-    opacity: 1;
 }
 
 #artifact-summary {
