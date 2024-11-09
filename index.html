@@ -10,18 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Move the filter popup here, outside of any containers -->
-    <div id="filterPopup" class="popup">
-        <div class="popup-content">
-            <span class="close">&times;</span>
-            <h3>Filter Artifacts</h3>
-            <div id="filterControls">
-                <!-- Filters will be dynamically added here -->
-            </div>
-            <button id="applyFilters">Apply Filters</button>
-        </div>
-    </div>
-
     <header>
         <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <path d="M10,50 Q10,10 50,10 Q90,10 90,50 Q90,90 50,90 Q30,90 20,80 L5,95 L15,75 Q10,65 10,50" fill="white"/>
@@ -29,7 +17,6 @@
             <path d="M25,35 L35,25 M55,35 L65,25 M40,55 L50,45 M60,55 L70,45 M35,75 L45,65 M55,75 L65,65" stroke="black" stroke-width="3" stroke-linecap="round"/>
         </svg>
         <h1>Clay Voices</h1>
-        <button id="filterButton" class="header-filter-button">Filter</button>
     </header>
     <main>
         <!-- Inside the #table-container div -->
@@ -54,26 +41,33 @@
     
         <!-- Summary Panel (Bottom Left) -->
         <div id="summary-panel" class="summary-panel">
+            <div class="button-container">
+                <button id="filterButton" class="filter-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                    </svg>
+                </button>
             <!-- Random Dice Button -->
-            <button id="randomDiceButton" class="random-dice-button">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" class="dice-svg">
-                    <!-- Tetrahedron -->
-                    <path d="M200 50 L50 350 L350 350 Z" fill="white" stroke="black" stroke-width="3"/>
-                    <path d="M200 50 L50 350 L200 200 Z" fill="white" stroke="black" stroke-width="3"/>
-                    
-                    <!-- Back edge (dashed) -->
-                    <path d="M200 50 L350 350" fill="none" stroke="black" stroke-width="3" stroke-dasharray="5,5"/>
-                    
-                    <!-- Front edge from middle point to back-right vertex -->
-                    <path d="M200 200 L350 350" fill="none" stroke="black" stroke-width="3"/>
-                    
-                    <!-- Dots -->
-                    <circle cx="200" cy="50" r="10" fill="black"/>
-                    <circle cx="50" cy="350" r="10" fill="black"/>
-                    <circle cx="350" cy="350" r="10" fill="black"/>
-                    <circle cx="200" cy="200" r="10" fill="black"/>
-                </svg>
-            </button>
+                <button id="randomDiceButton" class="random-dice-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" class="dice-svg">
+                        <!-- Tetrahedron -->
+                        <path d="M200 50 L50 350 L350 350 Z" fill="white" stroke="black" stroke-width="3"/>
+                        <path d="M200 50 L50 350 L200 200 Z" fill="white" stroke="black" stroke-width="3"/>
+                        
+                        <!-- Back edge (dashed) -->
+                        <path d="M200 50 L350 350" fill="none" stroke="black" stroke-width="3" stroke-dasharray="5,5"/>
+                        
+                        <!-- Front edge from middle point to back-right vertex -->
+                        <path d="M200 200 L350 350" fill="none" stroke="black" stroke-width="3"/>
+                        
+                        <!-- Dots -->
+                        <circle cx="200" cy="50" r="10" fill="black"/>
+                        <circle cx="50" cy="350" r="10" fill="black"/>
+                        <circle cx="350" cy="350" r="10" fill="black"/>
+                        <circle cx="200" cy="200" r="10" fill="black"/>
+                    </svg>
+                </button>
+            </div>
 
             <h2>Artifact Explorer</h2>
             <p id="initial-message">Choose an artifact to get started.</p>
@@ -97,6 +91,14 @@
             </video>
         </div>
     </main>
+    <div id="filterPopup" class="popup">
+        <div class="popup-content">
+            <span class="close">&times;</span>
+            <h2>Filter Artifacts</h2>
+            <div id="filterControls"></div>
+            <button id="applyFilters">Apply Filters</button>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
