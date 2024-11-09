@@ -213,16 +213,24 @@ h2 {
     overflow-x: auto;
     border: 2px solid var(--primary-color);
     border-radius: 10px;
-    padding: 1rem;
+    padding: 0rem;
     box-sizing: border-box;
     background-color: var(--panel-background);
+    position: relative; /* Add this */
 }
 
 #artifacts-data {
-    width: calc(100% - 2rem); /* Adjust width to account for container padding */
+    width: 100%;
     border-collapse: separate;
     border-spacing: 0 8px;
-    margin-top: -8px;
+    margin-top: 0;
+}
+
+#artifacts-data thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: var(--panel-background);
 }
 
 #artifacts-data th,
@@ -240,12 +248,13 @@ h2 {
 
 #artifacts-data th {
     background-color: var(--panel-background);
-    color: var(--secondary-color);
+    color: var(--primary-color); /* Changed from var(--secondary-color) to var(--primary-color) */
     font-weight: 600;
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 0.5px;
     border-bottom: 2px solid var(--secondary-color);
+    box-shadow: 0 2px 0 0 var(--secondary-color);
 }
 
 #artifacts-data tr {
