@@ -2,9 +2,12 @@ import os
 import anthropic
 import logging
 import pandas as pd
+from dotenv import load_dotenv
 from typing import Dict, Any
 from typing import Dict, Any, Generator
 import sys
+
+load_dotenv()
 
 # Add basic logging configuration
 logging.basicConfig(

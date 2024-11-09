@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anam AI Video Call</title>
+    <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="video-panel">
+            <div class="main-video-container">
+                <video id="video-element-id" autoplay playsinline></video>
+                <audio id="audio-element-id" autoplay></audio>
+                <div class="stream-status" id="streamStatus" style="display: none;">
+                    <span class="status-indicator status-live"></span>
+                    Live
+                </div>
+            </div>
+            <div class="user-video-container">
+                <video id="user-video" autoplay playsinline muted></video>
+                <div class="video-controls">
+                    <button id="toggleVideo" class="control-button">
+                        <span class="control-icon">📷</span>
+                    </button>
+                    <button id="toggleAudio" class="control-button">
+                        <span class="control-icon">🎤</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="controls">
+                <button id="startButton" class="button button-start">Start Conversation</button>
+                <button id="stopButton" class="button button-stop">Stop Conversation</button>
+            </div>
+            
+            <div class="conversation-log">
+                <div class="conversation-header">
+                    Conversation History
+                </div>
+                <div class="messages-container" id="messageLog"></div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>

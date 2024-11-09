@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Chat Interface</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Left Panel - Video Section -->
+        <div class="video-panel">
+            <!-- Main Video Container -->
+            <div class="main-video-container">
+                <video id="main-video" autoplay playsinline></video>
+                <div class="video-controls">
+                    <button id="toggleVideo" class="control-button">
+                        <span class="control-icon">📹</span>
+                    </button>
+                    <button id="toggleAudio" class="control-button">
+                        <span class="control-icon">🎤</span>
+                    </button>
+                </div>
+                <div id="streamStatus" class="stream-status hidden">
+                    <span class="status-indicator status-live"></span>
+                    Live
+                </div>
+            </div>
+            
+            <!-- User Video Container -->
+            <div class="user-video-container">
+                <video id="user-video" autoplay playsinline muted></video>
+            </div>
+        </div>
+
+        <!-- Right Panel - Controls and Chat -->
+        <div class="right-panel">
+            <!-- Control Buttons -->
+            <div class="controls">
+                <button id="startButton" class="button button-start">Start Session</button>
+                <button id="stopButton" class="button button-stop">End Session</button>
+            </div>
+
+            <!-- Conversation Log -->
+            <div class="conversation-log">
+                <div class="conversation-header">
+                    Chat History
+                </div>
+                <div id="messageLog" class="messages-container">
+                    <!-- Messages will be dynamically added here -->
+                </div>
+                <div class="message-input-container">
+                    <input type="text" id="messageInput" placeholder="Type your message...">
+                    <button id="sendMessageButton">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>
