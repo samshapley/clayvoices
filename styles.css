@@ -241,3 +241,86 @@ video {
     }
 }
 
+/* ... existing code ... */
+
+.popup {
+    display: none;
+    position: fixed;
+    z-index: 1000; /* Increased z-index to ensure it's above everything */
+    left: 0;
+    top: 0;
+    width: 100vw; /* Use viewport width */
+    height: 100vh; /* Use viewport height */
+    background-color: rgba(0,0,0,0.4);
+    overflow-y: auto; /* Allow scrolling if content is too tall */
+}
+
+.popup-content {
+    background-color: var(--panel-background);
+    margin: 5vh auto; /* Reduced from 15% to 5vh for better positioning */
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 500px;
+    position: relative;
+    max-height: 90vh; /* Limit height to 90% of viewport */
+    overflow-y: auto; /* Allow scrolling within the popup if content is too tall */
+}
+
+/* Add smooth scrollbar for the filter controls */
+#filterControls {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+/* Style the scrollbar */
+#filterControls::-webkit-scrollbar {
+    width: 8px;
+}
+
+#filterControls::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#filterControls::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+#filterControls::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: black;
+}
+
+.filter-group {
+    margin: 10px 0;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.filter-group select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+#filterButton {
+    margin-bottom: 10px;
+}

@@ -7,6 +7,18 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Move the filter popup here, outside of any containers -->
+    <div id="filterPopup" class="popup">
+        <div class="popup-content">
+            <span class="close">&times;</span>
+            <h3>Filter Artifacts</h3>
+            <div id="filterControls">
+                <!-- Filters will be dynamically added here -->
+            </div>
+            <button id="applyFilters">Apply Filters</button>
+        </div>
+    </div>
+
     <header>
         <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <path d="M10,50 Q10,10 50,10 Q90,10 90,50 Q90,90 50,90 Q30,90 20,80 L5,95 L15,75 Q10,65 10,50" fill="white"/>
@@ -20,7 +32,7 @@
         <div class="left-container">
             <!-- Artifacts Table -->
             <div class="panel" id="artifacts-table">
-                <h2>Artifacts Data</h2>
+                <button id="filterButton">Filter Data</button>
                 <div id="table-container">
                     <table id="artifacts-data">
                         <thead>
