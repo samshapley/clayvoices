@@ -17,7 +17,7 @@ def generate_video(artifact_id, prompt):
     print("Initiating generation request...")
     generation = client.generations.create(
         aspect_ratio="16:9",
-        loop=False,
+        loop=True,
         prompt=prompt,
     )
     print(f"Generation started with ID: {generation.id}")
