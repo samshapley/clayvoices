@@ -107,84 +107,133 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add this at the top level with other variables
     let summaryCache = new Map();
 
-function generateSummary(artifactId) {
-    // Ensure artifactId is a string
-    const idString = String(artifactId);
+    function generateSummary(artifactId) {
+        // Ensure artifactId is a string
+        const idString = String(artifactId);
+        
+        // Clear previous content and hide initial message
+        const artifactSummary = document.getElementById('artifact-summary');
+        const initialMessage = document.getElementById('initial-message');
+        artifactSummary.textContent = '';
+        initialMessage.style.display = 'none';
     
-    // Clear previous content and hide initial message
-    const artifactSummary = document.getElementById('artifact-summary');
-    const initialMessage = document.getElementById('initial-message');
-    artifactSummary.textContent = '';
-    initialMessage.style.display = 'none';
-
-    // Check if summary exists in cache
-    if (summaryCache.has(idString)) {
-        artifactSummary.textContent = summaryCache.get(idString);
-        return;
-    }
-
-    // Cancel existing stream if any
-    if (currentStream && currentStream.abort) {
-        currentStream.abort();
-    }
-
-    // Create new AbortController for this request
-    currentStream = new AbortController();
-
-    fetch('/generate-summary', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ artifactId: idString }),
-        signal: currentStream.signal
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-        let fullText = ''; // Store complete summary
-
-        function processText(text) {
-            artifactSummary.textContent += text;
-            fullText += text; // Add to complete summary
-            artifactSummary.scrollTop = artifactSummary.scrollHeight;
-        }
-
-        function readStream() {
-            return reader.read().then(({done, value}) => {
-                if (done) {
-                    if (buffer) {
-                        processText(buffer);
-                    }
-                    // Store complete summary in cache
-                    summaryCache.set(idString, fullText);
-                    return;
-                }
-
-                buffer += decoder.decode(value, {stream: true});
-                processText(buffer);
-                buffer = '';
-                
-                return readStream();
-            });
-        }
-
-        return readStream();
-    })
-    .catch(error => {
-        if (error.name === 'AbortError') {
-            console.log('Fetch aborted');
+        // Hide the summary divider initially
+        const summaryDivider = document.getElementById('summary-divider');
+        summaryDivider.style.display = 'none';
+    
+        // Check if summary exists in cache
+        if (summaryCache.has(idString)) {
+            artifactSummary.textContent = summaryCache.get(idString);
+            checkAndLoadVideo(idString);  // Add this line
             return;
         }
-        console.error('Error in generateSummary:', error);
-        artifactSummary.textContent = 'An error occurred while generating the summary.';
-    });
-}
+    
+        // Cancel existing stream if any
+        if (currentStream && currentStream.abort) {
+            currentStream.abort();
+        }
+    
+        // Create new AbortController for this request
+        currentStream = new AbortController();
+    
+        fetch('/generate-summary', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ artifactId: idString }),
+            signal: currentStream.signal
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+    
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+            let fullText = ''; // Store complete summary
+    
+            function processText(text) {
+                artifactSummary.textContent += text;
+                fullText += text; // Add to complete summary
+                artifactSummary.scrollTop = artifactSummary.scrollHeight;
+            }
+    
+            function readStream() {
+                return reader.read().then(({done, value}) => {
+                    if (done) {
+                        if (buffer) {
+                            processText(buffer);
+                        }
+                        // Store complete summary in cache
+                        summaryCache.set(idString, fullText);
+                        // Show the summary divider when stream is complete
+                        summaryDivider.style.display = 'block';
+                        // Check and load video after summary is complete
+                        checkAndLoadVideo(idString);
+                        return;
+                    }
+    
+                    buffer += decoder.decode(value, {stream: true});
+                    processText(buffer);
+                    buffer = '';
+                    
+                    return readStream();
+                });
+            }
+    
+            return readStream();
+        })
+        .catch(error => {
+            if (error.name === 'AbortError') {
+                console.log('Fetch aborted');
+                return;
+            }
+            console.error('Error in generateSummary:', error);
+            artifactSummary.textContent = 'An error occurred while generating the summary.';
+        });
+    }
+    
+    // Add this new function to handle video checking and loading
+    function checkAndLoadVideo(artifactId) {
+        fetch(`/check-video/${artifactId}`)
+            .then(response => response.json())
+            .then(data => {
+                const dreamView = document.getElementById('dream-view');
+                if (data.exists) {
+                    // Show video if it exists
+                    dreamView.innerHTML = `
+                        <video controls>
+                            <source src="/videos/${artifactId}.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>`;
+                } else {
+                    // Show loading message
+                    dreamView.innerHTML = `
+                        <div class="dreaming-message">
+                            <h3>Dreaming of the Ancient Past...</h3>
+                            <div class="loading-spinner"></div>
+                        </div>`;
+                    
+                    // Poll for video availability
+                    const checkVideo = setInterval(() => {
+                        fetch(`/check-video/${artifactId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.exists) {
+                                    clearInterval(checkVideo);
+                                    dreamView.innerHTML = `
+                                        <video controls>
+                                            <source src="/videos/${artifactId}.mp4" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                        </video>`;
+                                }
+                            });
+                    }, 5000); // Check every 5 seconds
+                }
+            });
+    }
 
     function updateTable(data) {
         const tableBody = document.querySelector('#artifacts-data tbody');
@@ -301,12 +350,3 @@ function generateSummary(artifactId) {
 
     applyFiltersButton.addEventListener('click', applyFilters);
 });
-
-function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}

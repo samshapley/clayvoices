@@ -580,3 +580,40 @@ button:disabled {
     white-space: pre-wrap;
     word-break: break-word;
 }
+
+#summary-divider {
+    width: 100%;
+    border: none;
+    border-top: 2px solid var(--primary-color);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+#thick-divider {
+    width: 100%;
+    border: none;
+    border-top: 4px solid var(--primary-color);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.dreaming-message {
+    text-align: center;
+    color: var(--secondary-color);
+    padding: 2rem;
+}
+
+.loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--secondary-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

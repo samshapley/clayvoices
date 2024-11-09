@@ -1,11 +1,12 @@
 // server.js
 
 const express = require('express');
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const app = express();
 const port = 8080;
+const videoCache = new Set(); // Track generated videos
 
 app.use(express.static('.'));
 app.use(express.json());
@@ -55,6 +56,14 @@ app.post('/prompt', (req, res) => {
     });
 });
 
+// Add new endpoint to check if video exists
+app.get('/check-video/:artifactId', (req, res) => {
+  const videoPath = path.join(__dirname, 'videos', `${req.params.artifactId}.mp4`);
+  fs.access(videoPath, fs.constants.F_OK, (err) => {
+      res.json({ exists: !err });
+  });
+});
+
 app.post('/generate-summary', (req, res) => {
   const artifactId = String(req.body.artifactId);
   if (!artifactId) {
@@ -67,27 +76,52 @@ app.post('/generate-summary', (req, res) => {
   res.setHeader('Transfer-Encoding', 'chunked');
 
   const pythonProcess = spawn('python', ['artifact_augmentation.py', artifactId]);
+  let summary = '';
 
   pythonProcess.stdout.on('data', (data) => {
-      res.write(data);
+      const text = data.toString();
+      summary += text;
+      res.write(text); // Send the chunk immediately
   });
 
   pythonProcess.stderr.on('data', (data) => {
       console.error(`Python Error: ${data}`);
-      // Only write error to response if it's not the Flask server startup messages
-      if (!data.toString().includes('Running on http://')) {
-          res.write(`Error: ${data}`);
-      }
   });
 
-  pythonProcess.on('close', (code) => {
-      if (code !== 0) {
-          console.error(`Python process exited with code ${code}`);
+  pythonProcess.on('close', async (code) => {
+      if (code === 0) {
+          // Only start video generation after summary is complete
+          const videoPath = path.join(__dirname, 'videos', `${artifactId}.mp4`);
+          
+          // Check if video already exists before generating
+          try {
+              await fs.promises.access(videoPath, fs.constants.F_OK);
+              videoCache.add(artifactId);
+          } catch {
+              // Video doesn't exist, generate it
+              const lumaProcess = spawn('python', ['luma-test.py', artifactId, summary]);
+              
+              lumaProcess.stderr.on('data', (data) => {
+                  console.error(`Luma Error: ${data}`);
+              });
+
+              lumaProcess.on('close', (lumaCode) => {
+                  if (lumaCode === 0) {
+                      videoCache.add(artifactId);
+                  }
+              });
+          }
       }
-      res.end();
+      res.end(); // End the response stream
   });
 });
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
+});
+
+// Add endpoint to serve videos
+app.get('/videos/:artifactId', (req, res) => {
+  const videoPath = path.join(__dirname, 'videos', `${req.params.artifactId}.mp4`);
+  res.sendFile(videoPath);
 });
