@@ -5,3 +5,4 @@ package-lock.json
 metadata.json
 linked_data.json
 inscription.atf
+.env

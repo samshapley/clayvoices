@@ -2,6 +2,9 @@
 import os
 import anthropic
 import logging
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Add basic logging configuration
 logging.basicConfig(
