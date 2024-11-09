@@ -1,15 +1,18 @@
 from elevenlabs import play
+import os
 from elevenlabs.client import ElevenLabs
 
 client = ElevenLabs(
-  api_key="sk_1d1f29e561acbcac674267a7eee28510fde7c869311531c7", # Defaults to ELEVEN_API_KEY
+    api_key=os.getenv('ELEVENLABS_API_KEY')
 )
 
 audio = client.generate(
     #text="Hello! 你好! Hola! नमस्ते! Bonjour! こんにちは! مرحبا! 안녕하세요! Ciao! Cześć! Привіт! வணக்கம்!",
-    text="Just testing to see if the key even works.",
-    voice="Brian",
+    text="And now I'm just testing, testing, testing the implementation of the newest API key. It all seems to be good!",
+    voice="Lily",
     model="eleven_multilingual_v2"
 )
 
 play(audio)
+
+#print(client.voices.get_all())
