@@ -1,47 +1,77 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const panels = document.querySelectorAll('.panel');
-    const scrapeButton = document.getElementById('scrapeButton');
-    const scrapedData = document.getElementById('scrapedData');
+document.addEventListener('DOMContentLoaded', function() {
+    loadArtifactsData();
+
     const promptInput = document.getElementById('promptInput');
     const promptButton = document.getElementById('promptButton');
     const promptResponse = document.getElementById('promptResponse');
+    const errorMessage = document.getElementById('errorMessage');
 
-    panels.forEach(panel => {
-        panel.addEventListener('click', () => {
-            panel.style.backgroundColor = getRandomColor();
-        });
-    });
+    promptButton.addEventListener('click', sendPrompt);
 
-    scrapeButton.addEventListener('click', async () => {
-        scrapedData.textContent = 'Scraping...';
-        try {
-            const response = await fetch('/scrape', { method: 'POST' });
-            const data = await response.text();
-            scrapedData.textContent = data;
-        } catch (error) {
-            scrapedData.textContent = 'Error occurred while scraping.';
-            console.error('Error:', error);
-        }
-    });
-
-    promptButton.addEventListener('click', async () => {
-        const prompt = promptInput.value;
-        promptResponse.textContent = 'Processing prompt...';
-        try {
-            const response = await fetch('/prompt', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ prompt }),
+    function loadArtifactsData() {
+        fetch('/artifacts-data')
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => Promise.reject(err));
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!Array.isArray(data) || data.length === 0) {
+                    throw new Error('No data received from server');
+                }
+                const tableBody = document.querySelector('#artifacts-data tbody');
+                tableBody.innerHTML = '';
+                data.forEach(artifact => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${artifact.id}</td>
+                        <td>${artifact.name}</td>
+                        <td>${artifact.language}</td>
+                        <td>${artifact.material}</td>
+                        <td>${artifact.period}</td>
+                        <td>${artifact.provenience}</td>
+                        <td>${artifact.collection}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading artifacts data:', error);
+                errorMessage.textContent = `Failed to load artifacts data: ${error.message || error}`;
             });
-            const data = await response.text();
-            promptResponse.textContent = data;
-        } catch (error) {
-            promptResponse.textContent = 'Error occurred while processing prompt.';
-            console.error('Error:', error);
+    }
+
+    function sendPrompt() {
+        const prompt = promptInput.value;
+        if (!prompt) {
+            errorMessage.textContent = 'Please enter a prompt.';
+            return;
         }
-    });
+
+        errorMessage.textContent = '';
+        promptButton.disabled = true;
+        promptResponse.textContent = 'Processing...';
+
+        fetch('/prompt', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ prompt: prompt })
+        })
+        .then(response => response.json())
+        .then(data => {
+            promptResponse.textContent = data.response;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            errorMessage.textContent = 'An error occurred. Please try again.';
+        })
+        .finally(() => {
+            promptButton.disabled = false;
+        });
+    }
 });
 
 function getRandomColor() {

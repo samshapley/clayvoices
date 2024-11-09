@@ -16,10 +16,26 @@
         <h1>Clay Voices</h1>
     </header>
     <main>
-        <div class="panel" id="knowledge-graph">
-            <h2>Knowledge Graph</h2>
-            <button id="scrapeButton">Scrape CDLI API</button>
-            <div id="scrapedData"></div>
+        <div class="panel" id="artifacts-table">
+            <h2>Artifacts Data</h2>
+            <div id="table-container">
+                <table id="artifacts-data">
+                    <thead>
+                        <tr>
+                            <th>Tablet ID</th>
+                            <th>Name</th>
+                            <th>Language</th>
+                            <th>Material</th>
+                            <th>Period</th>
+                            <th>Provenience</th>
+                            <th>Collection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Table rows will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div class="panel" id="avatar">
             <h2>Avatar</h2>
@@ -30,7 +46,7 @@
         </div>
         <div class="panel" id="dream-view">
             <video controls>
-                <source src="https://media.w3.org/2010/05/sintel/trailer_hd.mp4" type="video/mp4">
+                <source src="46bd36a6-6b8b-4c4e-a4a4-d4d4ff9172e5.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>

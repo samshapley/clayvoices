@@ -93,6 +93,46 @@ class CDLIAPIScraper:
         else:
             return pd.read_csv(io.StringIO(response.text))
 
+    def get_all_artifacts(self, format: str = "csv") -> pd.DataFrame:
+        logging.info("Attempting to scrape all artifacts with pagination")
+
+        endpoint = "/artifacts"
+        formats = {
+            "csv": "text/csv",
+            "tsv": "text/tab-separated-values",
+            "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        }
+        headers = {"Accept": formats.get(format, formats["csv"])}
+        
+        all_data = []
+        page = 1
+        while True:
+            try:
+                params = {"page": page, "page_size": 1000}
+                response = self._make_request(endpoint, params=params, headers=headers)
+                
+                if format == "xlsx":
+                    df = pd.read_excel(io.BytesIO(response.content))
+                elif format == "tsv":
+                    df = pd.read_csv(io.StringIO(response.text), sep="\t")
+                else:
+                    df = pd.read_csv(io.StringIO(response.text))
+                
+                all_data.append(df)
+                logging.info(f"Retrieved page {page} with {len(df)} records")
+                page += 1
+                
+            except requests.exceptions.RequestException as e:
+                if "404" in str(e):  # We've reached the end of available pages
+                    logging.info("Reached the last page of results")
+                    break
+                else:  # Some other error occurred
+                    raise
+        
+        final_df = pd.concat(all_data, ignore_index=True)
+        logging.info(f"Total records retrieved: {len(final_df)}")
+        return final_df
+
 def save_to_file(data: Any, filename: str):
     path = Path(filename)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -109,34 +149,11 @@ def save_to_file(data: Any, filename: str):
 def main():
     scraper = CDLIAPIScraper()
     
-    artifact_id = "1"
-    logging.info(f"Attempting to scrape data for artifact ID: {artifact_id}")
-    
     try:
-        # Get and save metadata
-        metadata = scraper.get_metadata(artifact_id)
-        save_to_file(metadata, f"metadata_{artifact_id}.json")
-        logging.info(f"Successfully retrieved and saved metadata for {artifact_id}")
-        
-        # Get and save linked data
-        linked_data = scraper.get_linked_data(artifact_id)
-        save_to_file(linked_data, f"linked_data_{artifact_id}.json")
-        logging.info(f"Successfully retrieved and saved linked data for {artifact_id}")
-        
-        # Get and save bibliography
-        bibliography = scraper.get_bibliography(artifact_id)
-        save_to_file(bibliography, f"bibliography_{artifact_id}.bib")
-        logging.info(f"Successfully retrieved and saved bibliography for {artifact_id}")
-        
-        # Get and save inscription
-        inscription = scraper.get_inscription(artifact_id)
-        save_to_file(inscription, f"inscription_{artifact_id}.atf")
-        logging.info(f"Successfully retrieved and saved inscription for {artifact_id}")
-        
-        # Get and save tabular export
-        tabular_export = scraper.get_tabular_export()
-        save_to_file(tabular_export, "artifacts_export.csv")
-        logging.info("Successfully retrieved and saved tabular export")
+        # Get and save all artifacts
+        all_artifacts = scraper.get_all_artifacts()
+        save_to_file(all_artifacts, "all_artifacts.csv")
+        logging.info("Successfully retrieved and saved all artifacts")
         
         logging.info("Scraping completed successfully.")
     except Exception as e:
