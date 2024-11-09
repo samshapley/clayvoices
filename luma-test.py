@@ -3,14 +3,12 @@ import time
 from lumaai import LumaAI
 import os
 
-#LUMAAI_API_KEY = "luma-9c6d5d4a-c45e-4e50-bb1f-69bb56e7db6a-33e6ef1e-a5d4-4e66-a730-29aa577f2589"
-
 client = LumaAI()
 
 generation = client.generations.create(
   aspect_ratio="16:9",
   loop=False,
-  prompt="The Cyrus Cylinder is an ancient clay cylinder, dating from the 6th century BCE, that contains a declaration in Akkadian cuneiform script by the Persian king Cyrus the Great after his conquest of Babylon. Found in 1879, it's considered one of the first documents on human rights, as it describes Cyrus's peaceful policy of religious and cultural tolerance toward conquered peoples. The artifact, currently housed in the British Museum, marks an important historical moment in the Persian Empire and is a symbol of enlightened leadership in ancient times. ",
+  prompt="Very grainy black and white footage of Sumerian tablet excavation. There are many onlookers.",
 )
 completed = False
 while not completed:
