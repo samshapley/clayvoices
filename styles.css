@@ -106,7 +106,42 @@ main {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
+.random-dice-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: var(--panel-background); /* Changed from #ffcc00 to white background */
+    border: 2px solid var(--secondary-color); /* Added border */
+    color: #333333;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.random-dice-button:hover {
+    background-color: #e6f3ff; /* Matches table highlight color */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.dice-svg {
+    width: 30px;
+    height: 30px;
+    transition: transform 0.3s ease;
+}
+
+.random-dice-button:hover .dice-svg {
+    transform: rotate(180deg);
+}
+
 .summary-panel {
+    position: relative;
     background-color: var(--panel-background);
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);

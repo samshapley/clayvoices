@@ -7,6 +7,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterPopup = document.getElementById('filterPopup');
     const closeButton = document.querySelector('.close');
     const applyFiltersButton = document.getElementById('applyFilters');
+
+    // Add Event Listener for Random Dice Button
+    const randomDiceButton = document.getElementById('randomDiceButton');
+    randomDiceButton.addEventListener('click', selectRandomArtifact);
+
     let artifactsData = []; // Store the full dataset
     let filterControls = {};
 
@@ -203,6 +208,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error loading artifacts data:', error);
                 errorMessage.textContent = `Failed to load artifacts data: ${error.message || error}`;
             });
+    }
+
+    // Function to select a random row from the table
+    function selectRandomArtifact() {
+        if (artifactsData.length === 0) {
+            errorMessage.textContent = 'No artifacts available to select.';
+            return;
+        }
+
+        // Generate a random index
+        const randomIndex = Math.floor(Math.random() * artifactsData.length);
+        const randomArtifact = artifactsData[randomIndex];
+
+        // Find the corresponding table row
+        const tableRow = document.querySelector(`#artifacts-data tbody tr[data-artifact-id="${randomArtifact.id}"]`);
+
+        if (tableRow) {
+            // Scroll the table to the selected row
+            tableRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Remove 'selected' class from all rows
+            document.querySelectorAll('#artifacts-data tbody tr').forEach(row => {
+                row.classList.remove('selected');
+            });
+
+            // Add 'selected' class to the random row
+            tableRow.classList.add('selected');
+
+            // Trigger the click event to generate summary
+            tableRow.click();
+        } else {
+            console.error('Random artifact row not found in the table.');
+            errorMessage.textContent = 'Selected artifact not found in the table.';
+        }
     }
 
     function sendPrompt() {

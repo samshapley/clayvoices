@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clay Voices</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -52,6 +54,27 @@
     
         <!-- Summary Panel (Bottom Left) -->
         <div id="summary-panel" class="summary-panel">
+            <!-- Random Dice Button -->
+            <button id="randomDiceButton" class="random-dice-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" class="dice-svg">
+                    <!-- Tetrahedron -->
+                    <path d="M200 50 L50 350 L350 350 Z" fill="white" stroke="black" stroke-width="3"/>
+                    <path d="M200 50 L50 350 L200 200 Z" fill="white" stroke="black" stroke-width="3"/>
+                    
+                    <!-- Back edge (dashed) -->
+                    <path d="M200 50 L350 350" fill="none" stroke="black" stroke-width="3" stroke-dasharray="5,5"/>
+                    
+                    <!-- Front edge from middle point to back-right vertex -->
+                    <path d="M200 200 L350 350" fill="none" stroke="black" stroke-width="3"/>
+                    
+                    <!-- Dots -->
+                    <circle cx="200" cy="50" r="10" fill="black"/>
+                    <circle cx="50" cy="350" r="10" fill="black"/>
+                    <circle cx="350" cy="350" r="10" fill="black"/>
+                    <circle cx="200" cy="200" r="10" fill="black"/>
+                </svg>
+            </button>
+
             <h2>Artifact Explorer</h2>
             <p id="initial-message">Choose an artifact to get started.</p>
             <p id="artifact-summary"></p>
