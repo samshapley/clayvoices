@@ -51,7 +51,7 @@ main {
     gap: 1rem;
     padding: 1rem;
     animation: fadeIn 0.5s ease-out;
-    max-height: calc(100vh - 80px);
+    max-height: calc(100vh - 80px); /* Maintain the viewport height calculation */
     overflow: hidden;
 }
 
@@ -153,19 +153,20 @@ h2 {
 
 #artifacts-table {
     grid-column: 1;
-    grid-row: 1;
+    grid-row: 1 / span 1; /* Make it span exactly 1 row */
+    height: 100%; /* Ensure full height of grid cell */
 }
 
 #table-container {
     width: 100%;
-    height: calc(100% - 60px);
+    height: 100%;
     overflow-y: auto;
     overflow-x: auto;
     border: 2px solid var(--primary-color);
     border-radius: 10px;
     padding: 1rem;
     box-sizing: border-box;
-    background-color: var(--panel-background); /* Add white background */
+    background-color: var(--panel-background);
 }
 
 #artifacts-data {

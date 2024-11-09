@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
             filterControls[column] = select;
         });
     }
-    
+
     let currentStream = null; // Add this at the top level to track the current fetch request
 
     function generateSummary(artifactId) {
@@ -162,6 +162,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    function applyFilters() {
+        // Get selected values from all filter controls
+        let filteredData = artifactsData.filter(artifact => {
+            // Check each filter
+            for (let [column, select] of Object.entries(filterControls)) {
+                const selectedValues = Array.from(select.selectedOptions).map(option => option.value);
+                // If there are selected values and the artifact's value isn't in them, exclude it
+                if (selectedValues.length > 0 && !selectedValues.includes('') && !selectedValues.includes(artifact[column])) {
+                    return false;
+                }
+            }
+            return true;
+        });
+    
+        // Update the table with filtered data
+        updateTable(filteredData);
+        
+        // Close the popup
+        filterPopup.style.display = 'none';
+    }
 
     function loadArtifactsData() {
         fetch('/artifacts-data')
