@@ -26,5 +26,8 @@
   "homepage": "https://github.com/samshapley/clayvoices#readme",
   "dependencies": {
     "express": "^4.21.1"
+  },
+  "devDependencies": {
+    "@flydotio/dockerfile": "^0.5.9"
   }
 }

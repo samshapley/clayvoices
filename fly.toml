@@ -1,21 +1,12 @@
-app = 'clayvoices'
+# fly.toml app configuration file generated for clayvoices-spring-frog-8948 on 2024-11-09T13:55:20Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'clayvoices-spring-frog-8948'
 primary_region = 'lhr'
 
 [build]
-  [build.args]
-    HOST = "clayvoices.com"
-
-[[services]]
-  internal_port = 8080
-  protocol = "tcp"
-
-  [[services.ports]]
-    handlers = ["http"]
-    port = "80"
-
-  [[services.ports]]
-    handlers = ["tls", "http"]
-    port = "443"
 
 [http_service]
   internal_port = 8080
@@ -24,6 +15,18 @@ primary_region = 'lhr'
   auto_start_machines = true
   min_machines_running = 0
   processes = ['app']
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 8080
+
+  [[services.ports]]
+    port = 80
+    handlers = ['http']
+
+  [[services.ports]]
+    port = 443
+    handlers = ['tls', 'http']
 
 [[vm]]
   memory = '1gb'

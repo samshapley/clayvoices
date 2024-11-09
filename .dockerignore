@@ -1,0 +1,7 @@
+node_modules
+artifacts_export.csv
+bibliography.bib
+package-lock.json
+metadata.json
+linked_data.json
+inscription.atf
