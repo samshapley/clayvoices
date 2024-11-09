@@ -1,7 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const promptInput = document.getElementById('promptInput');
-    const promptButton = document.getElementById('promptButton');
-    const promptResponse = document.getElementById('promptResponse');
     const errorMessage = document.getElementById('errorMessage');
     const filterButton = document.getElementById('filterButton');
     const filterPopup = document.getElementById('filterPopup');
@@ -16,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let filterControls = {};
 
     loadArtifactsData();
-    promptButton.addEventListener('click', sendPrompt);
     filterButton.addEventListener('click', () => filterPopup.style.display = 'block');
     closeButton.addEventListener('click', () => filterPopup.style.display = 'none');
     window.addEventListener('click', (e) => {
@@ -302,36 +298,6 @@ function generateSummary(artifactId) {
         }
     }
 
-    function sendPrompt() {
-        const prompt = promptInput.value;
-        if (!prompt) {
-            errorMessage.textContent = 'Please enter a prompt.';
-            return;
-        }
-
-        errorMessage.textContent = '';
-        promptButton.disabled = true;
-        promptResponse.textContent = 'Processing...';
-
-        fetch('/prompt', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ prompt: prompt })
-        })
-        .then(response => response.json())
-        .then(data => {
-            promptResponse.textContent = data.response;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            errorMessage.textContent = 'An error occurred. Please try again.';
-        })
-        .finally(() => {
-            promptButton.disabled = false;
-        });
-    }
 
     applyFiltersButton.addEventListener('click', applyFilters);
 });
