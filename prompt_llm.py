@@ -44,9 +44,11 @@ def prompt_llm(prompt: str) -> str:
         return ""
     
 
-prompt = "epic of gilgamesh"
-response = prompt_llm(prompt)
-if response:
-    logger.info(f"Response from Anthropic: {response}")
-else:
-    logger.info("No response from Anthropic")
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1:
+        prompt = sys.argv[1]
+        response = prompt_llm(prompt)
+        print(response)
+    else:
+        logger.error("No prompt provided as command line argument")

@@ -16,7 +16,7 @@ class TestCDLIAPIScraper(unittest.TestCase):
     def test_get_metadata(self, mock_get):
         self.logger.info("Running test_get_metadata")
         mock_response = Mock()
-        mock_response.json.return_value = {"id": "P000001", "type": "artifact"}
+        mock_response.json.return_value = {"id": "1", "type": "artifact"}
         mock_get.return_value = mock_response
 
         result = self.scraper.get_metadata("P000001")

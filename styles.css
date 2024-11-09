@@ -46,6 +46,8 @@ main {
     gap: 1.5rem;
     padding: 1.5rem;
     animation: fadeIn 0.5s ease-out;
+    max-height: calc(100vh - 80px); /* Add this line to account for header height and padding */
+    overflow: hidden;
 }
 
 @keyframes fadeIn {
@@ -81,13 +83,6 @@ main {
     grid-row: 1 / span 2;
 }
 
-#dream-view {
-    grid-column: 1;
-    grid-row: 2;
-    padding: 0;
-    overflow: hidden;
-}
-
 .panel:hover {
     transform: translateY(-5px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
@@ -100,11 +95,22 @@ h2 {
     font-weight: 500;
 }
 
+#dream-view {
+    grid-column: 1;
+    grid-row: 2;
+    padding: 0;
+    overflow: hidden;
+    display: flex; /* Add this */
+    align-items: center; /* Add this */
+    justify-content: center; /* Add this */
+}
+
 #dream-view video {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain; /* Change from cover to contain */
     border-radius: 10px;
+    max-height: 100%; /* Add this */
 }
 
 @media (max-width: 768px) {

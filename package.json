@@ -1,0 +1,30 @@
+{
+  "name": "clayvoices",
+  "version": "1.0.0",
+  "description": "Clay Voices - CDLI API Scraper and LLM Prompt",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "python -m pytest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samshapley/clayvoices.git"
+  },
+  "keywords": [
+    "clay",
+    "voices",
+    "cdli",
+    "api",
+    "llm"
+  ],
+  "author": "Sam Shapley",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/samshapley/clayvoices/issues"
+  },
+  "homepage": "https://github.com/samshapley/clayvoices#readme",
+  "dependencies": {
+    "express": "^4.21.1"
+  }
+}
