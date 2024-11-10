@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clay Voices</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -39,7 +40,7 @@
         </div>
     
         <!-- Summary Panel (Bottom Left) -->
-        <div id="summary-panel" class="summary-panel">
+        <div id="summaryPanel" class="summary-panel">
             <div class="button-container">
                 <button id="filterButton" class="filter-button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -77,7 +78,12 @@
     
         <!-- Replace the conversation-panel div in main -->
         <div id="conversation-panel" class="conversation-panel">
-            <button id="agentToggleButton" class="agent-toggle-button"></button>
+            <button id="agentToggleButton" class="agent-toggle-button">
+                <!-- Removed the existing spiralCanvas -->
+                <span>Chat to Scribe</span>
+            </button>
+            <!-- Added the animation canvas -->
+            <canvas id="animationCanvas" class="hidden"></canvas>
         </div>
     
         <!-- Dream View (Bottom Right) -->

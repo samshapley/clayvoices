@@ -601,33 +601,96 @@ button:disabled {
 }
 
 
-/* Remove the existing conversation-panel styles */
 .conversation-panel {
-    grid-column: 2;
-    grid-row: 1;
+    position: relative;
+    width: 100%;
     height: 100%;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.conversation-panel .agent-toggle-button {
+    position: relative;
+    z-index: 1; /* Ensure the button is above the canvas */
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+}
+
+#animationCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    z-index: 0; /* Changed from -1 to 0 */
+    opacity: 0; /* Start hidden */
+    transition: opacity 0.3s ease;
+}
+
+#animationCanvas.active {
+    opacity: 1;
+}
+
+.agent-toggle-button span {
+    z-index: 1;
+    color: var(--primary-color);
+    font-weight: bold;
+    transition: opacity 0.3s ease;
+    position: relative; /* Add this */
+}
+
+.agent-toggle-button span.hidden {
+    opacity: 0;
+}
+
+
+.agent-toggle-button {
+    width: 150px;
+    height: 150px;
+    border: 2px solid var(--primary-color);
+    border-radius: 50%;
+    background-color: var(--panel-background);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: visible; /* Changed from hidden to visible */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 2px solid var(--primary-color);
-    background-color: var(--panel-background);
-    border-radius: 10px;
-    padding: 1.5rem;
-    box-sizing: border-box;
 }
 
-.agent-toggle-button {
-    width: 80px;
-    height: 80px;
-    border: none;
-    border-radius: 50%;
-    background-color: #28a745;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+.agent-toggle-button canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300%; /* Increased from 100% to 300% */
+    height: 300%; /* Increased from 100% to 300% */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
 }
 
 .agent-toggle-button.active {
-    background-color: #dc3545;
+    background-color: transparent; /* Changed from red */
+    border: none; /* Remove border when active */
+}
+
+.agent-toggle-button.active canvas {
+    opacity: 1;
+}
+
+.agent-toggle-button.active span {
+    opacity: 0; /* Hide text instead of changing color */
 }

@@ -5,26 +5,45 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeButton = document.querySelector('.close');
     const applyFiltersButton = document.getElementById('applyFilters');
     const agentToggleButton = document.getElementById('agentToggleButton');
+    const summaryPanel = document.getElementById('summaryPanel');
+    const animationCanvas = document.getElementById('animationCanvas');
 
     let isAgentActive = false;
-    let agentPulsing = false;
 
     agentToggleButton.addEventListener('click', () => {
         if (isAgentActive) {
             stopAgent();
-        }
-        else {
+            stopAnimation();
+        } else {
             startAgent();
+            startAnimation();
         }
     }); // Added missing closing parenthesis
 
     function startAgent() {
+        // Get current tablet info if any is selected
+        const selectedRow = document.querySelector('#artifacts-data tbody tr.selected');
+        let contextData = {};
+        
+        if (selectedRow) {
+            const columns = ['id', 'name', 'language', 'material', 'period', 'provenience', 'collection'];
+            const tabletInfo = columns.reduce((acc, col, index) => {
+                acc[col] = selectedRow.children[index].textContent;
+                return acc;
+            }, {});
+            
+            contextData = {
+                summary: document.getElementById('artifact-summary').textContent,
+                tablet: tabletInfo
+            };
+        }
+    
         fetch('/start-agent', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({})
+            body: JSON.stringify({ context: contextData })
         })
         .then(response => response.json())
         .then(data => {
@@ -69,13 +88,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateAgentButton() {
         if (isAgentActive) {
             agentToggleButton.classList.add('active');
-            agentToggleButton.title = 'Stop Agent';
+            agentToggleButton.innerHTML = `<span>Chatting...</span>`;
         } else {
             agentToggleButton.classList.remove('active');
-            agentToggleButton.title = 'Start Agent';
-            stopPulsing();
+            agentToggleButton.innerHTML = `<span>Chat to Scribe</span>`;
         }
-    } // Added missing closing brace
+    }
 
     function displayError(message) {
         console.error('Error:', message);
@@ -98,7 +116,6 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('beforeunload', () => {
         agentSocket.close();
     });
-
 
     // Add Event Listener for Random Dice Button
     const randomDiceButton = document.getElementById('randomDiceButton');
@@ -253,6 +270,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 artifactSummary.textContent += text;
                 fullText += text; // Add to complete summary
                 artifactSummary.scrollTop = artifactSummary.scrollHeight;
+    
+                // Send the summary to the WebSocket when complete
+                if (isAgentActive) {
+                    const selectedRow = document.querySelector('#artifacts-data tbody tr.selected');
+                    if (selectedRow) {
+                        const columns = ['id', 'name', 'language', 'material', 'period', 'provenience', 'collection'];
+                        const tabletInfo = columns.reduce((acc, col, index) => {
+                            acc[col] = selectedRow.children[index].textContent;
+                            return acc;
+                        }, {});
+    
+                        agentSocket.send(JSON.stringify({
+                            type: 'context_update',
+                            data: {
+                                summary: fullText,
+                                tablet: tabletInfo
+                            }
+                        }));
+                    }
+                }
             }
     
             function readStream() {
@@ -441,6 +478,122 @@ document.addEventListener('DOMContentLoaded', function() {
             errorMessage.textContent = 'Selected artifact not found in the table.';
         }
     }
+
+    // New Particle Animation Logic
+    const animationCtx = animationCanvas.getContext('2d');
+    let animationWidth = animationCanvas.width = summaryPanel.clientWidth;
+    let animationHeight = animationCanvas.height = summaryPanel.clientHeight;
+    let tick = 0;
+    let particles = [];
+    let maxRadius = Math.sqrt((animationWidth/2)**2 + (animationHeight/2)**2);
+
+    // Cuneiform symbols (Unicode range: 0x12000 to 0x123FF)
+    const cuneiformSymbols = [];
+    for (let i = 0x12000; i <= 0x123FF; i++) {
+        cuneiformSymbols.push(String.fromCodePoint(i));
+    }
+
+    animationCtx.font = '24px "Segoe UI Historic", "Noto Sans Cuneiform", sans-serif';
+
+    function Particle() {
+        this.reset();
+    }
+
+    Particle.prototype.reset = function() {
+        this.radian = Math.random() * Math.PI * 2;
+        this.radius = 0;
+        this.angSpeed = 0.025;
+        this.incSpeed = 5.0;
+        this.x = this.y = 0;
+    }
+
+    Particle.prototype.step = function() {
+        const prevX = this.x;
+        const prevY = this.y;
+
+        this.radian += this.angSpeed;
+        this.radius += this.incSpeed;
+
+        this.x = this.radius * Math.cos(this.radian);
+        this.y = this.radius * Math.sin(this.radian);
+
+        const dx = this.x - prevX;
+        const dy = this.y - prevY;
+        const len = Math.sqrt(dx*dx + dy*dy);
+
+        for (let i = 0; i <= len; i += 30) {
+            const y = prevY + dy * i / len;
+            const x = prevX + dx * i / len;
+            
+            const posX = (x / 30 | 0) * 30;
+            const posY = (y / 30 | 0) * 30;
+
+            // Make background more opaque
+            animationCtx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            // Increase rectangle size to match new font size
+            animationCtx.fillRect(animationWidth/2 + posX, animationHeight/2 + posY - 24, 30, 30);
+            // Make text more opaque
+            animationCtx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+            animationCtx.fillText(cuneiformSymbols[Math.floor(Math.random() * cuneiformSymbols.length)], animationWidth/2 + posX, animationHeight/2 + posY);
+        }
+
+        if (this.radius >= maxRadius)
+            this.reset();
+    }
+
+    function animParticle() {
+        // Clear with more opacity for better contrast
+        animationCtx.fillStyle = 'rgba(255,255,255,0.3)';
+        animationCtx.fillRect(0, 0, animationWidth, animationHeight);
+
+        tick++;
+
+        // Reduce particle count for clearer visuals (from 100 to 50)
+        if (particles.length < 50 && Math.random() < 0.3)
+            particles.push(new Particle());
+
+        particles.forEach(particle => particle.step());
+
+        animationId = requestAnimationFrame(animParticle);
+    }
+
+
+    let animationId = null;
+
+    function startAnimation() {
+        // Show the animation canvas
+        animationCanvas.classList.add('active');
+        // Hide the toggle button text
+        const buttonText = agentToggleButton.querySelector('span');
+        if (buttonText) buttonText.classList.add('hidden');
+        // Start the animation
+        animParticle();
+    }
+
+    function stopAnimation() {
+        // Hide the animation canvas
+        animationCanvas.classList.remove('active');
+        // Show the toggle button text
+        const buttonText = agentToggleButton.querySelector('span');
+        if (buttonText) buttonText.classList.remove('hidden');
+        // Stop the animation
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+        }
+        // Clear the canvas
+        animationCtx.clearRect(0, 0, animationWidth, animationHeight);
+    }
+
+    // Update the resize handler to use new font size
+    window.addEventListener('resize', () => {
+        animationWidth = animationCanvas.width = summaryPanel.clientWidth;
+        animationHeight = animationCanvas.height = summaryPanel.clientHeight;
+        maxRadius = Math.sqrt((animationWidth/2)**2 + (animationHeight/2)**2);
+        animationCtx.font = '24px "Segoe UI Historic", "Noto Sans Cuneiform", sans-serif';
+        animationCtx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        animationCtx.fillRect(0, 0, animationWidth, animationHeight);
+    });
 
 
     applyFiltersButton.addEventListener('click', applyFilters);

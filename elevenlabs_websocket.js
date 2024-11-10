@@ -41,7 +41,10 @@ const EventEmitter = require('events');
 class ConversationEmitter extends EventEmitter {}
 const conversationEmitter = new ConversationEmitter();
 
-function connectWebSocket() {
+function connectWebSocket(initialContext = {}) {
+
+  currentContext = initialContext;
+
   ws = new WebSocket(websocket_url, {
     headers: {
       'xi-api-key': ELEVENLABS_API_KEY
@@ -53,6 +56,15 @@ function connectWebSocket() {
     isConnected = true;
     startMicrophone();
     startPingInterval();
+
+      // Send initial context if available
+      if (Object.keys(currentContext).length > 0) {
+        ws.send(JSON.stringify({
+            type: 'context_update',
+            data: currentContext
+        }));
+    }
+
     conversationEmitter.emit('connected');
   });
 
@@ -60,6 +72,11 @@ function connectWebSocket() {
     const message = JSON.parse(data);
 
     switch (message.type) {
+      case 'context_update':
+        currentContext = message.data;
+        console.log('Context updated:', currentContext);
+        break;
+
       case 'conversation_initiation_metadata':
         console.log('Conversation initiated:', message.conversation_initiation_metadata_event.conversation_id);
         break;
@@ -258,8 +275,10 @@ function disconnect() {
   }
 }
 
+// Export the currentContext
 module.exports = {
   connectWebSocket,
   disconnect,
-  conversationEmitter
+  conversationEmitter,
+  getCurrentContext: () => currentContext
 };
