@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let contextData = {};
         
         if (selectedRow) {
-            const columns = ['artifact_id', 'period', 'location', 'excavation_no', 'materials', 'genres', 'collections', 'museum_no'];
+            const columns = ['artifact_id', 'period', 'excavation_no', 'materials', 'genres', 'collections', 'museum_no'];
             const tabletInfo = columns.reduce((acc, col, index) => {
                 acc[col] = selectedRow.children[index].textContent;
                 return acc;
@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (isAgentActive) {
                     const selectedRow = document.querySelector('#artifacts-data tbody tr.selected');
                     if (selectedRow) {
-                        const columns = ['artifact_id', 'period', 'location', 'excavation_no', 'materials', 'genres', 'collections', 'museum_no'];
+                        const columns = ['artifact_id', 'period', 'excavation_no', 'materials', 'genres', 'collections', 'museum_no'];
                         const tabletInfo = columns.reduce((acc, col, index) => {
                             acc[col] = selectedRow.children[index].textContent;
                             return acc;

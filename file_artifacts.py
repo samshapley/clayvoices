@@ -1,6 +1,6 @@
 import pandas as pd
 
-def load_limited_artifacts(file_path='all_artifacts.csv', limit=10000):
+def load_limited_artifacts(file_path='all_artifacts.csv', limit=100):
     try:
         # Read the CSV file and limit to first 100 rows
         df = pd.read_csv(file_path, nrows=limit)
