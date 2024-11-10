@@ -7,7 +7,8 @@ import urllib3
 import ssl
 
 # Disable SSL warnings
-urllib3.disable_warnings(urllib3.exceptions.NotOpenSSLWarning)
+from urllib3.exceptions import InsecureRequestWarning
+urllib3.disable_warnings(InsecureRequestWarning)
 
 def generate_video(artifact_id, prompt):
     print(f"Starting video generation for artifact {artifact_id}")

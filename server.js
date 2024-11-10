@@ -63,6 +63,7 @@ conversationEmitter.on('error', (error) => {
   isAgentRunning.flag = false;
 });
 
+
 app.get('/artifacts-data', (req, res) => {
   const csvFilePath = path.join(__dirname, 'limited_artifacts.csv');
   console.log('Attempting to read:', csvFilePath);
@@ -75,26 +76,48 @@ app.get('/artifacts-data', (req, res) => {
           return;
       }
 
+      // Parse CSV with respect to quoted fields
+      const parseCSVLine = (line) => {
+          const entries = [];
+          let entry = '';
+          let withinQuotes = false;
+          
+          for (let i = 0; i < line.length; i++) {
+              const char = line[i];
+              
+              if (char === '"') {
+                  withinQuotes = !withinQuotes;
+              } else if (char === ',' && !withinQuotes) {
+                  entries.push(entry.trim());
+                  entry = '';
+              } else {
+                  entry += char;
+              }
+          }
+          entries.push(entry.trim()); // Push the last entry
+          return entries;
+      };
+
       const rows = data.split('\n');
-      const headers = rows[0].split(',');
+      const headers = parseCSVLine(rows[0]);
       const artifacts = rows.slice(1)
           .filter(row => row.trim()) // Skip empty rows
           .map(row => {
-              const values = row.split(',');
-              return {
-                  id: String(values[0]).trim(), // Ensure ID is a string and trim whitespace
-                  name: values[1],
-                  language: values[2],
-                  material: values[3],
-                  period: values[4],
-                  provenience: values[5],
-                  collection: values[6]
-              };
-          });
+            const values = parseCSVLine(row);
+            const artifact = {};
+            
+            // Map all values using headers as keys
+            headers.forEach((header, index) => {
+                artifact[header] = values[index]?.trim() || '';
+            });
+            
+            return artifact;
+        });
 
       res.json(artifacts);
   });
 });
+
 
 app.post('/prompt', (req, res) => {
     const prompt = req.body.prompt;

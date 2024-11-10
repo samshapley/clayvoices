@@ -1,9 +1,6 @@
 import pandas as pd
 
-def load_limited_artifacts(file_path='limited_artifacts.csv', limit=100):
-    """
-    Load the first 100 rows from the artifacts CSV file
-    """
+def load_limited_artifacts(file_path='all_artifacts.csv', limit=10000):
     try:
         # Read the CSV file and limit to first 100 rows
         df = pd.read_csv(file_path, nrows=limit)
@@ -27,6 +24,9 @@ if __name__ == "__main__":
     
     # Display basic information about the loaded data
     if artifacts_df is not None:
+        # print each column header and its index
+        for i, col in enumerate(artifacts_df.columns):
+            print(f"Column {i}: {col}")
         print("\nDataset Info:")
         print(f"Number of rows: {len(artifacts_df)}")
         print(f"Columns: {list(artifacts_df.columns)}")

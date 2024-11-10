@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let contextData = {};
         
         if (selectedRow) {
-            const columns = ['id', 'name', 'language', 'material', 'period', 'provenience', 'collection'];
+            const columns = ['artifact_id', 'period', 'location', 'excavation_no', 'materials', 'genres', 'collections', 'museum_no'];
             const tabletInfo = columns.reduce((acc, col, index) => {
                 acc[col] = selectedRow.children[index].textContent;
                 return acc;
@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (isAgentActive) {
                     const selectedRow = document.querySelector('#artifacts-data tbody tr.selected');
                     if (selectedRow) {
-                        const columns = ['id', 'name', 'language', 'material', 'period', 'provenience', 'collection'];
+                        const columns = ['artifact_id', 'period', 'location', 'excavation_no', 'materials', 'genres', 'collections', 'museum_no'];
                         const tabletInfo = columns.reduce((acc, col, index) => {
                             acc[col] = selectedRow.children[index].textContent;
                             return acc;
@@ -302,6 +302,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         summaryCache.set(idString, fullText);
                         // Show the summary divider when stream is complete
                         summaryDivider.style.display = 'block';
+
+                        // **Display the "See on CDLI" Button**
+                        const seeOnCDLIButton = document.getElementById('seeOnCDLIButton');
+                        if (seeOnCDLIButton) {
+                            seeOnCDLIButton.href = `https://cdli.mpiwg-berlin.mpg.de/artifacts/${artifactId}`;
+                            seeOnCDLIButton.style.display = 'inline-block';
+                        }
+
                         // Check and load video after summary is complete
                         checkAndLoadVideo(idString);
                         return;
@@ -373,29 +381,31 @@ document.addEventListener('DOMContentLoaded', function() {
         
         data.forEach(artifact => {
             const row = document.createElement('tr');
-            row.dataset.artifactId = artifact.id;
+            // Add the artifact ID to the row's dataset
             row.innerHTML = `
-                <td>${artifact.id}</td>
-                <td>${artifact.name}</td>
-                <td>${artifact.language}</td>
-                <td>${artifact.material}</td>
-                <td>${artifact.period}</td>
-                <td>${artifact.provenience}</td>
-                <td>${artifact.collection}</td>
+                <td>${artifact.artifact_id}</td>
+                <td>${artifact.period || 'Unknown'}</td>
+                <td>${artifact.excavation_no || 'Unknown'}</td>
+                <td>${artifact.materials || 'Unknown'}</td>
+                <td>${artifact.genres || 'Unknown'}</td>
+                <td>${artifact.collections || 'Unknown'}</td>
+                <td>${artifact.museum_no || 'Unknown'}</td>
             `;
             
-            // Click handler to add 'selected' class
             row.addEventListener('click', function() {
-                // Remove selected class from all rows
                 document.querySelectorAll('#artifacts-data tbody tr').forEach(r => {
                     r.classList.remove('selected');
                 });
                 
-                // Add selected class to clicked row
                 row.classList.add('selected');
-                
-                console.log('Row clicked for artifact:', artifact.id);
-                generateSummary(artifact.id);
+                // Make sure we're using the correct artifact ID
+                const artifactId = artifact.artifact_id;
+                console.log('Row clicked for artifact:', artifactId);
+                if (artifactId) {
+                    generateSummary(artifactId);
+                } else {
+                    console.error('No artifact ID found for clicked row');
+                }
             });
             
             tableBody.appendChild(row);
@@ -447,35 +457,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to select a random row from the table
     function selectRandomArtifact() {
-        if (artifactsData.length === 0) {
-            errorMessage.textContent = 'No artifacts available to select.';
+        const visibleRows = document.querySelectorAll('#artifacts-data tbody tr');
+        if (visibleRows.length === 0) {
+            console.error('No artifacts available to select.');
             return;
         }
-
-        // Generate a random index
-        const randomIndex = Math.floor(Math.random() * artifactsData.length);
-        const randomArtifact = artifactsData[randomIndex];
-
-        // Find the corresponding table row
-        const tableRow = document.querySelector(`#artifacts-data tbody tr[data-artifact-id="${randomArtifact.id}"]`);
-
-        if (tableRow) {
+    
+        // Generate a random index from visible rows
+        const randomIndex = Math.floor(Math.random() * visibleRows.length);
+        const randomRow = visibleRows[randomIndex];
+    
+        if (randomRow) {
             // Scroll the table to the selected row
-            tableRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
+            randomRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
             // Remove 'selected' class from all rows
-            document.querySelectorAll('#artifacts-data tbody tr').forEach(row => {
+            visibleRows.forEach(row => {
                 row.classList.remove('selected');
             });
-
+    
             // Add 'selected' class to the random row
-            tableRow.classList.add('selected');
-
-            // Trigger the click event to generate summary
-            tableRow.click();
+            randomRow.classList.add('selected');
+    
+            // Get the artifact ID from the first cell
+            const artifactId = randomRow.cells[0].textContent;
+            
+            // Generate summary for the selected artifact
+            generateSummary(artifactId);
         } else {
-            console.error('Random artifact row not found in the table.');
-            errorMessage.textContent = 'Selected artifact not found in the table.';
+            console.error('Failed to select random artifact.');
         }
     }
 

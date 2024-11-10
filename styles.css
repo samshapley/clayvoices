@@ -695,3 +695,22 @@ button:disabled {
 .agent-toggle-button.active span {
     opacity: 0; /* Hide text instead of changing color */
 }
+
+/* Add styles for the "See on CDLI" button */
+.see-on-cdli-button {
+    display: inline-block; /* Initially hidden via inline style */
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    text-align: center;
+}
+
+.see-on-cdli-button:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}

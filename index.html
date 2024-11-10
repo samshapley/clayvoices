@@ -24,13 +24,13 @@
             <table id="artifacts-data">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Language</th>
-                        <th>Material</th>
+                        <th>Artifact ID</th>
                         <th>Period</th>
-                        <th>Provenience</th>
+                        <th>Excavation No.</th>
+                        <th>Material</th>
+                        <th>Genre</th>
                         <th>Collection</th>
+                        <th>Museum No.</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -42,11 +42,9 @@
         <!-- Summary Panel (Bottom Left) -->
         <div id="summaryPanel" class="summary-panel">
             <div class="button-container">
-                <button id="filterButton" class="filter-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-                    </svg>
-                </button>
+                <button id="filterButton" class="filter-button">𒐊</button>
+                <!-- Random Dice Button -->
+
             <!-- Random Dice Button -->
                 <button id="randomDiceButton" class="random-dice-button">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" class="dice-svg">
@@ -74,6 +72,11 @@
             <p id="initial-message">Choose an artifact to get started.</p>
             <p id="artifact-summary"></p>
             <hr id="summary-divider" style="display: none;">
+        
+            <!-- Added "See on CDLI" Button -->
+            <a id="seeOnCDLIButton" href="#" target="_blank" class="see-on-cdli-button" style="display: none;">
+                See on CDLI
+            </a>
         </div>
     
         <!-- Replace the conversation-panel div in main -->
