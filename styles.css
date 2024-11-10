@@ -1,8 +1,8 @@
 :root {
-    --primary-color: #000000;
-    --secondary-color: #4a4e69;
-    --background-color: #f6f6f6;
-    --text-color: #333333;
+    --primary-color: #b85c38; /* Changed from black to clay/terracotta color */
+    --secondary-color: #c17f59; /* Adjusted to a lighter terracotta */
+    --background-color: #f6f3f0; /* Slightly warmer background */
+    --text-color: #4a3c32; /* Warmer text color */
     --panel-background: #ffffff;
 }
 
@@ -108,7 +108,7 @@ main {
     right: 10px;
     background-color: var(--panel-background); /* Changed from #ffcc00 to white background */
     border: 2px solid var(--secondary-color); /* Added border */
-    color: #333333;
+    color: #000000;
     padding: 0.5rem;
     cursor: pointer;
     border-radius: 4px;
@@ -315,7 +315,7 @@ h2 {
 
 
 button {
-    background-color: #4CAF50;
+    background-color: #000000;
     border: none;
     color: white;
     padding: 0.5rem 1rem;
@@ -329,7 +329,8 @@ button {
 }
 
 button:hover {
-    background-color: #45a049;
+    background-color: #000000;
+    color: white;
 }
 
 button:disabled {
