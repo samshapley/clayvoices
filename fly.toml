@@ -3,32 +3,38 @@
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'clayvoices-spring-frog-8948'
-primary_region = 'lhr'
+app = "clayvoices-spring-frog-8948"
+primary_region = "lhr"
 
 [build]
 
-[http_service]
-  internal_port = 8080
-  force_https = true
-  auto_stop_machines = 'stop'
-  auto_start_machines = true
-  min_machines_running = 0
-  processes = ['app']
-
 [[services]]
-  protocol = 'tcp'
   internal_port = 8080
 
   [[services.ports]]
     port = 80
-    handlers = ['http']
+    handlers = ["http"]
 
   [[services.ports]]
     port = 443
-    handlers = ['tls', 'http']
+    handlers = ["tls", "http"]
+
+  # Health Checks
+  [[services.http_checks]]
+    interval = "10s"
+    timeout = "2s"
+    grace_period = "5s"
+    method = "get"
+    path = "/health"
+    protocol = "http"
+    tls_skip_verify = false
+
+  # Concurrency Limits
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
 
 [[vm]]
-  memory = '1gb'
-  cpu_kind = 'shared'
+  memory = "2gb"
+  cpu_kind = "shared"
   cpus = 1

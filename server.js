@@ -5,10 +5,21 @@ const { spawn, exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const app = express();
-const port = 8080;
 const videoCache = new Set(); // Track generated videos
 
+const { WebSocketServer } = require('ws');
+
+const { createServer } = require('http');
+const server = createServer(app);
+const wss = new WebSocketServer({ server, path: '/agent-socket' }); // Specify the WebSocket path
+
+// Add this line to explicitly set the listening address
+const host = '0.0.0.0';
+const port = process.env.PORT || 8080;
+
 const { connectWebSocket, disconnect, conversationEmitter } = require('./elevenlabs_websocket');
+
+isAgentRunning.flag = false;
 
 app.use(express.static('.'));
 app.use(express.json());
@@ -20,21 +31,32 @@ app.use((req, res, next) => {
   next();
 });
 
-// New endpoint to start the agent
+// Endpoint to start the agent
 app.post('/start-agent', (req, res) => {
   if (!isAgentRunning()) {
-    connectWebSocket();
-    res.json({ status: 'Agent started' });
+    try {
+      connectWebSocket();
+      isAgentRunning.flag = true;  // Set flag immediately
+      res.json({ status: 'Agent started' });
+    } catch (error) {
+      isAgentRunning.flag = false;  // Reset flag on error
+      res.status(500).json({ error: `Failed to start agent: ${error.message}` });
+    }
   } else {
     res.status(400).json({ error: 'Agent is already running' });
   }
 });
 
-// New endpoint to stop the agent
+// Endpoint to stop the agent
 app.post('/stop-agent', (req, res) => {
   if (isAgentRunning()) {
-    disconnect();
-    res.json({ status: 'Agent stopped' });
+    try {
+      disconnect();
+      isAgentRunning.flag = false;  // Set flag immediately
+      res.json({ status: 'Agent stopped' });
+    } catch (error) {
+      res.status(500).json({ error: `Failed to stop agent: ${error.message}` });
+    }
   } else {
     res.status(400).json({ error: 'Agent is not running' });
   }
@@ -42,9 +64,7 @@ app.post('/stop-agent', (req, res) => {
 
 // Helper function to check if the agent is running
 function isAgentRunning() {
-  // You can implement a better check based on your actual implementation
-  // For simplicity, we'll use a flag
-  return typeof isAgentRunning.flag !== 'undefined' && isAgentRunning.flag;
+  return Boolean(isAgentRunning.flag);
 }
 
 isAgentRunning.flag = false;
@@ -131,7 +151,7 @@ app.post('/prompt', (req, res) => {
     });
 });
 
-// Add new endpoint to check if video exists
+// Endpoint to check if a video exists
 app.get('/check-video/:artifactId', (req, res) => {
   const videoPath = path.join(__dirname, 'videos', `${req.params.artifactId}.mp4`);
   fs.access(videoPath, fs.constants.F_OK, (err) => {
@@ -191,12 +211,40 @@ app.post('/generate-summary', (req, res) => {
   });
 });
 
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+// WebSocket Connection Handling
+wss.on('connection', (ws) => {
+  console.log('Client connected');
+  
+  ws.on('message', (message) => {
+      console.log('Received:', message);
+  });
+
+  ws.on('close', () => {
+      console.log('Client disconnected');
+  });
+});
+
+// Update the listen call
+server.listen(port, host, () => {
+  console.log(`Server running at http://${host}:${port}`);
 });
 
 // Add endpoint to serve videos
 app.get('/videos/:artifactId', (req, res) => {
   const videoPath = path.join(__dirname, 'videos', `${req.params.artifactId}.mp4`);
   res.sendFile(videoPath);
+});
+
+// Add this near your other routes
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// Add this near your other routes
+app.get('/audio-context', (req, res) => {
+  res.json({ 
+      sampleRate: 16000,
+      channels: 1,
+      bitDepth: 16
+  });
 });

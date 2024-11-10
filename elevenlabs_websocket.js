@@ -3,10 +3,11 @@ const mic = require('node-microphone');
 const ffmpeg = require('fluent-ffmpeg');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 ffmpeg.setFfmpegPath(ffmpegPath);
-const player = require('node-wav-player');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { spawn } = require('child_process');  // Add this with other imports
+const Speaker = require('speaker');  // Add this import
 
 require('dotenv').config();
 
@@ -35,6 +36,17 @@ let averageRTT = 0;
 let ws = null;
 let microphone = null;
 let isConnected = false;
+let currentContext = {};
+
+// Initialize Web Audio API if in browser environment
+let audioContext;
+if (typeof window !== 'undefined') {
+    try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) {
+        console.error('Web Audio API is not supported in this environment');
+    }
+}
 
 // Event Emitter to communicate with server.js
 const EventEmitter = require('events');
@@ -42,7 +54,6 @@ class ConversationEmitter extends EventEmitter {}
 const conversationEmitter = new ConversationEmitter();
 
 function connectWebSocket(initialContext = {}) {
-
   currentContext = initialContext;
 
   ws = new WebSocket(websocket_url, {
@@ -57,12 +68,12 @@ function connectWebSocket(initialContext = {}) {
     startMicrophone();
     startPingInterval();
 
-      // Send initial context if available
-      if (Object.keys(currentContext).length > 0) {
-        ws.send(JSON.stringify({
-            type: 'context_update',
-            data: currentContext
-        }));
+    // Send initial context if available
+    if (Object.keys(currentContext).length > 0) {
+      ws.send(JSON.stringify({
+        type: 'context_update',
+        data: currentContext
+      }));
     }
 
     conversationEmitter.emit('connected');
@@ -76,7 +87,6 @@ function connectWebSocket(initialContext = {}) {
         currentContext = message.data;
         console.log('Context updated:', currentContext);
         break;
-
       case 'conversation_initiation_metadata':
         console.log('Conversation initiated:', message.conversation_initiation_metadata_event.conversation_id);
         break;
@@ -127,6 +137,10 @@ function connectWebSocket(initialContext = {}) {
 }
 
 function startMicrophone() {
+  if (process.env.DISABLE_AUDIO) {
+    console.log('Audio disabled - microphone not started');
+    return;
+  }
   try {
     microphone = new mic();
 
@@ -162,7 +176,6 @@ async function playAudio(base64Audio) {
     timestamp: Date.now()
   });
   
-  // Wait for a few chunks before starting playback
   if (!isPlaying && audioBuffer.length >= config.bufferThreshold) {
     await processAudioBuffer();
   }
@@ -176,58 +189,91 @@ async function processAudioBuffer() {
 
   isPlaying = true;
 
-  // Take only the current chunks, leaving new incoming chunks for the next play
   const chunksToPlay = [...audioBuffer];
   audioBuffer = [];
 
-  // Create a single concatenated audio file from multiple chunks
-  const tempConcatFile = path.join(os.tmpdir(), `concat-${Date.now()}.raw`);
-  const tempOutputFile = path.join(os.tmpdir(), `output-${Date.now()}.wav`);
-
   try {
-    // Sort and concatenate chunks to play
-    chunksToPlay.sort((a, b) => a.timestamp - b.timestamp);
+    // Concatenate all audio chunks
     const allAudioData = Buffer.concat(
       chunksToPlay.map(item => Buffer.from(item.audio, 'base64'))
     );
-    fs.writeFileSync(tempConcatFile, allAudioData);
 
-    // Start converting next batch while current one is playing
-    const conversionPromise = new Promise((resolve, reject) => {
-      ffmpeg()
-        .input(tempConcatFile)
-        .inputFormat('s16le')
-        .inputOptions(['-ar 16000', '-ac 1'])
-        .outputOptions(['-ar 16000', '-ac 1'])
-        .toFormat('wav')
-        .on('error', reject)
-        .on('end', resolve)
-        .save(tempOutputFile);
-    });
+    // If in browser environment, use Web Audio API
+    if (typeof window !== 'undefined' && audioContext) {
+      // Create an AudioBuffer from the raw PCM data
+      const audioBuffer = audioContext.createBuffer(1, allAudioData.length / 2, 16000);
+      const channelData = audioBuffer.getChannelData(0);
+      
+      // Convert the 16-bit PCM data to float32
+      for (let i = 0; i < allAudioData.length / 2; i++) {
+        channelData[i] = allAudioData.readInt16LE(i * 2) / 32768.0;
+      }
 
-    await conversionPromise;
+      const source = audioContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(audioContext.destination);
+      
+      source.onended = () => {
+        isPlaying = false;
+        unmuteMicrophone();
+        
+        if (audioBuffer.length > 0) {
+          processAudioBuffer();
+        }
+      };
 
-    // Play the concatenated audio file
-    await player.play({
-      path: tempOutputFile,
-      sync: true
-    });
+      source.start(0);
+    } else {
+      // Node.js environment - use Speaker
+      const speaker = new Speaker({
+        channels: 1,
+        bitDepth: 16,
+        sampleRate: 16000
+      });
 
-    // Cleanup temp files
-    fs.unlinkSync(tempConcatFile);
-    fs.unlinkSync(tempOutputFile);
+      speaker.on('close', () => {
+        isPlaying = false;
+        unmuteMicrophone();
+        
+        if (audioBuffer.length > 0) {
+          processAudioBuffer();
+        }
+      });
 
+      speaker.write(allAudioData);
+      speaker.end();
+    }
   } catch (error) {
     console.error('Failed to play audio:', error);
+    isPlaying = false;
+    unmuteMicrophone();
   }
+}
 
-  isPlaying = false;
-  unmuteMicrophone();
-
-  // If more audio arrived while playing, process it immediately
-  if (audioBuffer.length > 0) {
-    await processAudioBuffer();
-  }
+function convertToWav(rawData) {
+  // Create WAV header
+  const wavHeader = Buffer.alloc(44);
+  
+  // RIFF chunk descriptor
+  wavHeader.write('RIFF', 0);
+  wavHeader.writeUInt32LE(36 + rawData.length, 4);
+  wavHeader.write('WAVE', 8);
+  
+  // fmt sub-chunk
+  wavHeader.write('fmt ', 12);
+  wavHeader.writeUInt32LE(16, 16); // Subchunk1Size
+  wavHeader.writeUInt16LE(1, 20); // AudioFormat (PCM)
+  wavHeader.writeUInt16LE(1, 22); // NumChannels
+  wavHeader.writeUInt32LE(16000, 24); // SampleRate
+  wavHeader.writeUInt32LE(32000, 28); // ByteRate
+  wavHeader.writeUInt16LE(2, 32); // BlockAlign
+  wavHeader.writeUInt16LE(16, 34); // BitsPerSample
+  
+  // data sub-chunk
+  wavHeader.write('data', 36);
+  wavHeader.writeUInt32LE(rawData.length, 40);
+  
+  return Buffer.concat([wavHeader, rawData]);
 }
 
 function muteMicrophone() {
@@ -275,7 +321,6 @@ function disconnect() {
   }
 }
 
-// Export the currentContext
 module.exports = {
   connectWebSocket,
   disconnect,

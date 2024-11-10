@@ -21,6 +21,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }); // Added missing closing parenthesis
 
     function startAgent() {
+        if (isAgentActive) {
+            console.warn('Agent is already active');
+            return;
+        }
+    
         // Get current tablet info if any is selected
         const selectedRow = document.querySelector('#artifacts-data tbody tr.selected');
         let contextData = {};
@@ -45,43 +50,53 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify({ context: contextData })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => Promise.reject(err));
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.status === 'Agent started') {
                 isAgentActive = true;
                 updateAgentButton();
-            } else {
-                console.error('Failed to start agent:', data.error);
-                displayError(`Failed to start agent, ${data.error}`);
             }
         })
         .catch(error => {
             console.error('Error starting agent:', error);
-            displayError(`Error starting agent: ${error.message || error}`);
+            isAgentActive = false;
+            updateAgentButton();
+            displayError(`Error starting agent: ${error.error || error.message || error}`);
         });
     }
 
     function stopAgent() {
+        if (!isAgentActive) {
+            console.warn('Agent is not active');
+            return;
+        }
+    
         fetch('/stop-agent', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({})
+            }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => Promise.reject(err));
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.status === 'Agent stopped') {
                 isAgentActive = false;
                 updateAgentButton();
-            } else {
-                console.error('Failed to stop agent:', data.error);
-                displayError(`Failed to stop agent, ${data.error}`);
             }
         })
         .catch(error => {
             console.error('Error stopping agent:', error);
-            displayError(`Error stopping agent: ${error.message || error}`);
+            displayError(`Error stopping agent: ${error.error || error.message || error}`);
         });
     }
 
@@ -99,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Error:', message);
     }
 
-    const agentSocket = new WebSocket(`ws://${window.location.host}/agent-socket`);
+    const agentSocket = new WebSocket(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/agent-socket`);
 
     agentSocket.onopen = () => {
         console.log('WebSocket connected');
