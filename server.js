@@ -8,8 +8,60 @@ const app = express();
 const port = 8080;
 const videoCache = new Set(); // Track generated videos
 
+const { connectWebSocket, disconnect, conversationEmitter } = require('./elevenlabs_websocket');
+
 app.use(express.static('.'));
 app.use(express.json());
+
+// Middleware to handle CORS if needed
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
+
+// New endpoint to start the agent
+app.post('/start-agent', (req, res) => {
+  if (!isAgentRunning()) {
+    connectWebSocket();
+    res.json({ status: 'Agent started' });
+  } else {
+    res.status(400).json({ error: 'Agent is already running' });
+  }
+});
+
+// New endpoint to stop the agent
+app.post('/stop-agent', (req, res) => {
+  if (isAgentRunning()) {
+    disconnect();
+    res.json({ status: 'Agent stopped' });
+  } else {
+    res.status(400).json({ error: 'Agent is not running' });
+  }
+});
+
+// Helper function to check if the agent is running
+function isAgentRunning() {
+  // You can implement a better check based on your actual implementation
+  // For simplicity, we'll use a flag
+  return typeof isAgentRunning.flag !== 'undefined' && isAgentRunning.flag;
+}
+
+isAgentRunning.flag = false;
+
+// Listen to conversationEmitter events to update the flag
+conversationEmitter.on('connected', () => {
+  isAgentRunning.flag = true;
+});
+
+conversationEmitter.on('disconnected', () => {
+  isAgentRunning.flag = false;
+});
+
+conversationEmitter.on('error', (error) => {
+  console.error('Conversation module error:', error);
+  isAgentRunning.flag = false;
+});
 
 app.get('/artifacts-data', (req, res) => {
   const csvFilePath = path.join(__dirname, 'limited_artifacts.csv');

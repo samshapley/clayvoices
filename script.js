@@ -4,6 +4,101 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterPopup = document.getElementById('filterPopup');
     const closeButton = document.querySelector('.close');
     const applyFiltersButton = document.getElementById('applyFilters');
+    const agentToggleButton = document.getElementById('agentToggleButton');
+
+    let isAgentActive = false;
+    let agentPulsing = false;
+
+    agentToggleButton.addEventListener('click', () => {
+        if (isAgentActive) {
+            stopAgent();
+        }
+        else {
+            startAgent();
+        }
+    }); // Added missing closing parenthesis
+
+    function startAgent() {
+        fetch('/start-agent', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'Agent started') {
+                isAgentActive = true;
+                updateAgentButton();
+            } else {
+                console.error('Failed to start agent:', data.error);
+                displayError(`Failed to start agent, ${data.error}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error starting agent:', error);
+            displayError(`Error starting agent: ${error.message || error}`);
+        });
+    }
+
+    function stopAgent() {
+        fetch('/stop-agent', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'Agent stopped') {
+                isAgentActive = false;
+                updateAgentButton();
+            } else {
+                console.error('Failed to stop agent:', data.error);
+                displayError(`Failed to stop agent, ${data.error}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error stopping agent:', error);
+            displayError(`Error stopping agent: ${error.message || error}`);
+        });
+    }
+
+    function updateAgentButton() {
+        if (isAgentActive) {
+            agentToggleButton.classList.add('active');
+            agentToggleButton.title = 'Stop Agent';
+        } else {
+            agentToggleButton.classList.remove('active');
+            agentToggleButton.title = 'Start Agent';
+            stopPulsing();
+        }
+    } // Added missing closing brace
+
+    function displayError(message) {
+        console.error('Error:', message);
+    }
+
+    const agentSocket = new WebSocket(`ws://${window.location.host}/agent-socket`);
+
+    agentSocket.onopen = () => {
+        console.log('WebSocket connected');
+    }
+
+    agentSocket.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+    }
+
+    agentSocket.onclose = () => {
+        console.log('WebSocket closed');
+    }
+
+    window.addEventListener('beforeunload', () => {
+        agentSocket.close();
+    });
+
 
     // Add Event Listener for Random Dice Button
     const randomDiceButton = document.getElementById('randomDiceButton');
